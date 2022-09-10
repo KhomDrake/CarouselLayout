@@ -3,8 +3,18 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Vini/Programming/Android/CarouselLayout/app/src/main/res/drawable/background_blue.xml" value="0.2215" />
+        <entry key="..\:/Vini/Programming/Android/CarouselLayout/app/src/main/res/drawable/background_purple.xml" value="0.2215" />
+        <entry key="..\:/Vini/Programming/Android/CarouselLayout/app/src/main/res/drawable/background_red.xml" value="0.2215" />
+        <entry key="..\:/Vini/Programming/Android/CarouselLayout/app/src/main/res/layout/_reditem_layout.xml" value="0.358695652173913" />
         <entry key="..\:/Vini/Programming/Android/CarouselLayout/app/src/main/res/layout/activity_main.xml" value="0.17831813576494426" />
+        <entry key="..\:/Vini/Programming/Android/CarouselLayout/app/src/main/res/layout/blue_item.xml" value="0.358695652173913" />
+        <entry key="..\:/Vini/Programming/Android/CarouselLayout/app/src/main/res/layout/blue_item_layout.xml" value="0.358695652173913" />
         <entry key="..\:/Vini/Programming/Android/CarouselLayout/app/src/main/res/layout/item.xml" value="0.23493975903614459" />
+        <entry key="..\:/Vini/Programming/Android/CarouselLayout/app/src/main/res/layout/purple_item.xml" value="0.358695652173913" />
+        <entry key="..\:/Vini/Programming/Android/CarouselLayout/app/src/main/res/layout/purple_item_layout.xml" value="0.358695652173913" />
+        <entry key="..\:/Vini/Programming/Android/CarouselLayout/app/src/main/res/layout/red_item.xml" value="0.358695652173913" />
+        <entry key="..\:/Vini/Programming/Android/CarouselLayout/app/src/main/res/layout/red_item_layout.xml" value="0.358695652173913" />
       </map>
     </option>
   </component>

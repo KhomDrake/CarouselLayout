@@ -1,9 +1,12 @@
 package com.vinicius.carousel
 
 import android.content.Context
+import android.content.res.Resources
+import android.graphics.Rect
 import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.HorizontalScrollView
@@ -21,135 +24,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
-private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-
-abstract class CarouselAdapter {
-
-    private lateinit var parent: ViewGroup
-    protected var onUpdate: (List<UpdateCarousel>) -> Unit = { }
-
-    abstract fun bind(position: Int, view: View)
-
-    abstract fun getItemCount(): Int
-
-    open fun getViewType(position: Int): Int = 0
-
-    abstract fun createView(viewType: Int, parent: ViewGroup): View
-
-    fun setParent(parent: ViewGroup) {
-        this.parent = parent
-    }
-
-    fun setOnUpdateItems(update: (List<UpdateCarousel>) -> Unit) {
-        onUpdate = update
-    }
-
-}
-
-class UpdateCarousel(
-    val position: Int,
-    val type: UpdateCarouselType,
-    val oldPosition: Int
-)
-
-enum class UpdateCarouselType {
-    MOVE,
-    REMOVE,
-    UPDATE,
-    ADD
-}
-
-abstract class ListCarouselAdapter<T : Any>(private val diffUtil: DiffUtil.ItemCallback<T>) : CarouselAdapter() {
-
-    protected val items: MutableList<T> = mutableListOf()
-
-    val currentList: List<T>
-        get() = items
-
-    abstract override fun bind(position: Int, view: View)
-
-    override fun getItemCount() = items.size
-
-    abstract override fun createView(viewType: Int, parent: ViewGroup): View
-
-    fun submitList(newList: List<T>) {
-        scope.launch {
-            val updates = mutableListOf<UpdateCarousel>()
-            val removedItems = items.filter { item ->
-                !newList.contains(item)
-            }.map { items.indexOf(it) }
-            newList.forEachIndexed { index, newItem ->
-                var isNewItem = true
-                var oldPosition = -1
-                var hasNewContent = false
-                items.forEachIndexed { indexOld, oldItem ->
-                    val areItemsTheSame = diffUtil.areItemsTheSame(oldItem, newItem)
-                    if(areItemsTheSame) {
-                        isNewItem = false
-                        val areContentsTheSame = diffUtil.areContentsTheSame(oldItem, newItem)
-                        hasNewContent = !areContentsTheSame
-                        if(indexOld != index) oldPosition = indexOld
-                        return@forEachIndexed
-                    }
-                }
-                if(isNewItem) {
-                    updates.add(
-                        UpdateCarousel(index, UpdateCarouselType.ADD, oldPosition)
-                    )
-                }
-
-                if(!isNewItem && oldPosition != -1) {
-                    updates.add(
-                        UpdateCarousel(index, UpdateCarouselType.MOVE, oldPosition)
-                    )
-                }
-
-                if(hasNewContent) {
-                    updates.add(
-                        UpdateCarousel(index, UpdateCarouselType.UPDATE, oldPosition)
-                    )
-                }
-            }
-            removedItems.forEach {
-                updates.add(UpdateCarousel(it, UpdateCarouselType.REMOVE, it))
-            }
-            items.clear()
-            items.addAll(newList)
-
-            launch(Dispatchers.Main) {
-                onUpdate.invoke(updates)
-            }
-        }
-    }
-
-}
-
-class MyAdapter: ListCarouselAdapter<MyObject>(MyDiffUtil()) {
-
-    override fun bind(position: Int, view: View) {
-        view.findViewById<AppCompatTextView>(R.id.title).text = items[position].name
-    }
-
-    override fun createView(viewType: Int, parent: ViewGroup): View {
-        return LayoutInflater.from(parent.context).inflate(R.layout.item, parent, false)
-    }
-
-}
-
-class MyObject(val id: Int, val name: String)
-
-class MyDiffUtil: DiffUtil.ItemCallback<MyObject>() {
-    override fun areItemsTheSame(oldItem: MyObject, newItem: MyObject): Boolean {
-        return oldItem.id == newItem.id
-    }
-
-    override fun areContentsTheSame(oldItem: MyObject, newItem: MyObject): Boolean {
-        return oldItem.name == newItem.name
-    }
-
-}
-
-
 class CarouselLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -158,6 +32,7 @@ class CarouselLayout @JvmOverloads constructor(
 
     private val root: LinearLayoutCompat
     private var carouselAdapter: CarouselAdapter? = null
+    private var configLayoutCarousel = ConfigLayoutCarousel()
 
     init {
         root = LinearLayoutCompat(context).apply {
@@ -170,7 +45,10 @@ class CarouselLayout @JvmOverloads constructor(
         addView(root)
     }
 
-    private fun onUpdateItems(updates: List<UpdateCarousel>) {
+    private fun onUpdateItems(updates: List<UpdateCarousel>, clear: Boolean) {
+        if(clear) clear()
+        Log.i("Vini", "Updates: ${updates.map { it.type }}")
+
         val movesAndRemoves =
             updates.filter { it.type == UpdateCarouselType.REMOVE || it.type == UpdateCarouselType.MOVE }
         val rest = updates.filter {
@@ -214,8 +92,6 @@ class CarouselLayout @JvmOverloads constructor(
             }
         }
 
-
-
         rest.forEach { updateCarousel ->
             val viewPosition = updateCarousel.position
             val child: View? = root.getChildAt(viewPosition)
@@ -224,11 +100,11 @@ class CarouselLayout @JvmOverloads constructor(
                     carouselAdapter?.let {
                         val viewType = it.getViewType(viewPosition)
                         val view = child ?: run {
-                            val view = it.createView(viewType, root)
+                            val view = it.createView(viewType, root, configLayoutCarousel)
                             addViewAtPosition(view, viewPosition)
                             view
                         }
-                        it.bind(viewPosition, view)
+                        it.bind(viewPosition, view, configLayoutCarousel)
                     }
                 }
                 UpdateCarouselType.MOVE -> {
@@ -242,9 +118,9 @@ class CarouselLayout @JvmOverloads constructor(
                 UpdateCarouselType.ADD -> {
                     carouselAdapter?.let {
                         val viewType = it.getViewType(viewPosition)
-                        val view = it.createView(viewType, root)
+                        val view = it.createView(viewType, root, configLayoutCarousel)
                         addViewAtPosition(view, viewPosition)
-                        it.bind(viewPosition, view)
+                        it.bind(viewPosition, view, configLayoutCarousel)
                     }
                 }
                 else -> Unit
@@ -258,16 +134,77 @@ class CarouselLayout @JvmOverloads constructor(
         } else root.addView(view)
     }
 
+    fun setConfigCarouselLayout(new: ConfigLayoutCarousel) {
+        configLayoutCarousel = new
+    }
+
+    private var moveTo = false
+
+    override fun onTouchEvent(ev: MotionEvent): Boolean {
+        val superOnTouchEvent = super.onTouchEvent(ev)
+
+        if(ev.action == MotionEvent.ACTION_MOVE) moveTo = true
+
+        if(ev.action == MotionEvent.ACTION_UP) {
+            if(moveTo) {
+                root.apply {
+                    val items = children.asSequence().map {
+                        val globalVisibilityRectangle = Rect()
+                        it.getGlobalVisibleRect(globalVisibilityRectangle)
+                        Pair(it, globalVisibilityRectangle)
+                    }.filter {
+                        it.first.isOnTheScreen(it.second)
+                    }.map {
+                        val percentageShow = ((it.second.right - it.second.left) / it.first.width.toFloat())
+                        Pair(it.first, percentageShow)
+                    }.sortedByDescending { it.second }.toList()
+
+                    items.firstOrNull()?.let {
+                        val initialPosition = it.first.getPositionInParent().first
+                        val screenWidth = Resources.getSystem().displayMetrics.widthPixels
+                        val width = it.first.width
+                        val distance = initialPosition + (width / 2) - (screenWidth / 2)
+                        smoothScrollTo(distance, 0)
+                    }
+                }
+            }
+
+            moveTo = false
+        }
+
+        return superOnTouchEvent
+    }
+
+    private fun View.getPositionInParent(): Pair<Int, Int> {
+        val parent = parent as ViewGroup
+        val positionPreview = intArrayOf(1, 2)
+        val positionFrame = intArrayOf(1, 2)
+        parent.getLocationInWindow(positionPreview)
+        getLocationInWindow(positionFrame)
+
+        return Pair(
+            positionFrame[0] - positionPreview[0],
+            positionFrame[1] - positionPreview[1]
+        )
+    }
+
+    private fun View.isOnTheScreen(actualPosition: Rect) : Boolean {
+        if(!isShown || visibility != VISIBLE) return false
+
+        val width = Resources.getSystem().displayMetrics.widthPixels
+        val height = Resources.getSystem().displayMetrics.heightPixels
+        val screen = Rect(0, 0, width, height)
+        return actualPosition.intersect(screen)
+    }
+
     fun setCarouselAdapter(new: CarouselAdapter?) {
+        clear()
         carouselAdapter = new
         carouselAdapter?.setParent(root)
         carouselAdapter?.setOnUpdateItems(::onUpdateItems)
-        if(carouselAdapter == null) {
-            clear()
-        }
     }
 
-    fun clear() {
+    private fun clear() {
         root.removeAllViews()
     }
 }

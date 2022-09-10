@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.vinicius.carousel.myviews.PurpleView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/purple_root"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp"/>
