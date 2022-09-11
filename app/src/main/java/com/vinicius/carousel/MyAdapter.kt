@@ -39,7 +39,7 @@ enum class MyObjectType {
     PURPLE
 }
 
-class MyObject(val id: Int, val name: String)
+class MyObject(val id: Int, var name: String)
 
 class MyDiffUtil: DiffUtil.ItemCallback<MyObject>() {
     override fun areItemsTheSame(oldItem: MyObject, newItem: MyObject): Boolean {

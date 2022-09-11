@@ -38,17 +38,17 @@ abstract class ListCarouselAdapter<T : Any>(private val diffUtil: DiffUtil.ItemC
 
     abstract override fun createView(viewType: Int, parent: ViewGroup, configLayoutCarousel: ConfigLayoutCarousel): View
 
-    fun notifySetDataChanged() {
+    fun clearData() {
         val oldList = items.toList()
         items.clear()
         submitList(oldList, true)
     }
 
-    private fun submitList(newList: List<T>, isSetDataChanged: Boolean) {
+    private fun submitList(newList: List<T>, clear: Boolean) {
         scope.launch {
             val updates = mutableListOf<UpdateCarousel>()
             val removedItems = items.filter { item ->
-                !newList.contains(item)
+                newList.find { diffUtil.areItemsTheSame(it, item) } == null
             }.map { items.indexOf(it) }
             newList.forEachIndexed { index, newItem ->
                 var isNewItem = true
@@ -85,11 +85,20 @@ abstract class ListCarouselAdapter<T : Any>(private val diffUtil: DiffUtil.ItemC
             removedItems.forEach {
                 updates.add(UpdateCarousel(it, UpdateCarouselType.REMOVE, it))
             }
+
+            if(newList.size == 1 && items.size > 1 || items.size == 1 && newList.size > 1) {
+                updates.add(
+                    UpdateCarousel(0, UpdateCarouselType.UPDATE, 0)
+                )
+            }
+
+            if(updates.isEmpty()) return@launch
+
             items.clear()
             items.addAll(newList)
 
             launch(Dispatchers.Main) {
-                onUpdate.invoke(updates, isSetDataChanged)
+                onUpdate.invoke(updates, clear)
             }
         }
     }

@@ -18,12 +18,11 @@ class ConfigLayoutCarousel(
     fun configLayout(context: Context, view: View, position: Int, size: Int) {
         view.layoutParams?.apply {
             val edgeWidthRealValue = context.getDimension(edgeWidth)
-            width = when(size) {
-                1 -> {
-                    (Resources.getSystem().displayMetrics.widthPixels * percentageOfScreen).toInt() -
-                            (timesEdgeWidthOnlyOneItem * edgeWidthRealValue).toInt()
-                }
-                else -> (Resources.getSystem().displayMetrics.widthPixels * percentageOfScreen).toInt() -
+            width = if(size == 1) {
+                (Resources.getSystem().displayMetrics.widthPixels * percentageOfScreen).toInt() -
+                        (timesEdgeWidthOnlyOneItem * edgeWidthRealValue).toInt()
+            } else {
+                (Resources.getSystem().displayMetrics.widthPixels * percentageOfScreen).toInt() -
                         (timesEdgeWidthMoreItems * edgeWidthRealValue).toInt()
             }
         }

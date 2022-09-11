@@ -4,8 +4,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.widget.AppCompatTextView
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
@@ -17,9 +15,13 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         setupAdd()
         setupRemove()
         setupMove()
+        setupUpdate()
         setupChangeItems()
 
         findViewById<CarouselLayout>(R.id.carousel).apply {
+            setConfigCarouselLayout(
+                ConfigLayoutCarousel(percentageOfScreen = 1f)
+            )
             setCarouselAdapter(adapter)
         }
     }
@@ -41,6 +43,19 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         }
     }
 
+    private fun setupUpdate() {
+        val update = findViewById<AppCompatTextView>(R.id.update)
+        update.setOnClickListener {
+            val oldList = adapter.currentList
+            val randomIndex = Random.nextInt(0, adapter.currentList.size)
+            val item = generateItem()
+            val currentList = oldList.mapIndexed { index, myObject ->
+                MyObject(myObject.id, if(randomIndex == index) item.name else myObject.name)
+            }
+            adapter.submitList(currentList)
+        }
+    }
+
     private fun setAdapter(myObjectType: MyObjectType) {
         adapter.currentList
         findViewById<CarouselLayout>(R.id.carousel)?.apply {
@@ -49,7 +64,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 //            newAdapter.submitList(adapter.currentList)
 //            adapter = newAdapter
             adapter.type = myObjectType
-            adapter.notifySetDataChanged()
+            adapter.clearData()
         }
     }
 
@@ -94,9 +109,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     private fun generateItem() : MyObject {
         val initialText = "generate"
 
-        var text = "W ${Random.nextInt(0, 1000)}  \n"
-
         val quantity = Random.nextInt(2, 10)
+
+        var text = "W ${Random.nextInt(0, 1000)} $quantity \n"
 
         for(i in 0 until quantity) {
             text += initialText
@@ -104,7 +119,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 text += "\n"
             }
         }
-
 
         return MyObject(Random.nextInt(Int.MIN_VALUE, Int.MAX_VALUE), text)
     }

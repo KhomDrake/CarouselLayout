@@ -30,24 +30,19 @@ class CarouselLayout @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : HorizontalScrollView(context, attrs, defStyleAttr) {
 
-    private val root: LinearLayoutCompat
+    private val root: CarouselHorizontalLayout
     private var carouselAdapter: CarouselAdapter? = null
     private var configLayoutCarousel = ConfigLayoutCarousel()
 
     init {
-        root = LinearLayoutCompat(context).apply {
-            orientation = LinearLayoutCompat.HORIZONTAL
-            layoutParams = LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-        }
+        root = CarouselHorizontalLayout(context, attrs, defStyleAttr)
         addView(root)
     }
 
     private fun onUpdateItems(updates: List<UpdateCarousel>, clear: Boolean) {
+        if(updates.isEmpty()) return
+
         if(clear) clear()
-        Log.i("Vini", "Updates: ${updates.map { it.type }}")
 
         val movesAndRemoves =
             updates.filter { it.type == UpdateCarouselType.REMOVE || it.type == UpdateCarouselType.MOVE }
@@ -126,6 +121,8 @@ class CarouselLayout @JvmOverloads constructor(
                 else -> Unit
             }
         }
+
+        root.measure()
     }
 
     private fun addViewAtPosition(view: View, position: Int) {
@@ -142,6 +139,15 @@ class CarouselLayout @JvmOverloads constructor(
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
         val superOnTouchEvent = super.onTouchEvent(ev)
+
+        val actionName = when(ev.action) {
+            MotionEvent.ACTION_UP -> "ACTION_UP"
+            MotionEvent.ACTION_DOWN -> "ACTION_DOWN"
+            MotionEvent.ACTION_MOVE -> "ACTION_MOVE"
+            MotionEvent.ACTION_SCROLL -> "ACTION_SCROLL"
+            else -> "Other ${ev.action}"
+        }
+//        Log.i("Vini", "Action: $actionName")
 
         if(ev.action == MotionEvent.ACTION_MOVE) moveTo = true
 
