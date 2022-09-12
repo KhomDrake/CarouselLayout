@@ -31,7 +31,7 @@ abstract class ListCarouselAdapter<T : Any>(private val diffUtil: DiffUtil.ItemC
         get() = items
 
     override fun bind(position: Int, view: View, configLayoutCarousel: ConfigLayoutCarousel) {
-        configLayoutCarousel.configLayout(view.context, view, position, currentList.size)
+
     }
 
     override fun getItemCount() = items.size

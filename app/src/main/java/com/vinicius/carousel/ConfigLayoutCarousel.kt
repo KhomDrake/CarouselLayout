@@ -18,13 +18,14 @@ class ConfigLayoutCarousel(
     fun configLayout(context: Context, view: View, position: Int, size: Int) {
         view.layoutParams?.apply {
             val edgeWidthRealValue = context.getDimension(edgeWidth)
-            width = if(size == 1) {
+            val newWidth = if(size == 1) {
                 (Resources.getSystem().displayMetrics.widthPixels * percentageOfScreen).toInt() -
                         (timesEdgeWidthOnlyOneItem * edgeWidthRealValue).toInt()
             } else {
                 (Resources.getSystem().displayMetrics.widthPixels * percentageOfScreen).toInt() -
                         (timesEdgeWidthMoreItems * edgeWidthRealValue).toInt()
             }
+            if(newWidth != width) width = newWidth
         }
 
         val marginStart = if(position == 0) context.getDimension(startAndEndMargin)
@@ -34,12 +35,14 @@ class ConfigLayoutCarousel(
             else context.getDimension(betweenMargin)
 
         (view.layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
-            setMargins(
-                marginStart,
-                topMargin,
-                marginEnd,
-                bottomMargin
-            )
+            if(leftMargin != marginStart || rightMargin != marginEnd) {
+                setMargins(
+                    marginStart,
+                    topMargin,
+                    marginEnd,
+                    bottomMargin
+                )
+            }
         }
     }
 

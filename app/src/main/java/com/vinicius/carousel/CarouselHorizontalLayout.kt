@@ -24,7 +24,7 @@ internal class CarouselHorizontalLayout @JvmOverloads constructor(
 
     private var viewsAdding = 0
 
-    fun measure() {
+    fun updateViewsToSameHeight() {
         doOnPreDraw {
             val maxHeight = children.asSequence().sortedByDescending { it.height }
                 .firstOrNull()?.height ?: return@doOnPreDraw

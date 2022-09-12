@@ -1,28 +1,17 @@
 package com.vinicius.carousel
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.HorizontalScrollView
-import android.widget.TextView
-import androidx.appcompat.widget.AppCompatTextView
-import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.children
-import androidx.core.view.isVisible
-import androidx.core.view.setPadding
-import androidx.recyclerview.widget.DiffUtil
 import androidx.transition.TransitionManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
-import kotlin.math.abs
 
 class CarouselLayout @JvmOverloads constructor(
     context: Context,
@@ -122,7 +111,15 @@ class CarouselLayout @JvmOverloads constructor(
             }
         }
 
-        root.measure()
+        updateChildren()
+        root.updateViewsToSameHeight()
+    }
+
+    private fun updateChildren() {
+        val adapter = carouselAdapter ?: return
+        root.children.forEachIndexed { index, view ->
+            configLayoutCarousel.configLayout(view.context, view, index, adapter.getItemCount())
+        }
     }
 
     private fun addViewAtPosition(view: View, position: Int) {
@@ -137,6 +134,9 @@ class CarouselLayout @JvmOverloads constructor(
 
     private var moveTo = false
 
+    private var selectedItem = -1
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(ev: MotionEvent): Boolean {
         val superOnTouchEvent = super.onTouchEvent(ev)
 
@@ -154,18 +154,19 @@ class CarouselLayout @JvmOverloads constructor(
         if(ev.action == MotionEvent.ACTION_UP) {
             if(moveTo) {
                 root.apply {
-                    val items = children.asSequence().map {
+                    val items = children.asSequence().mapIndexed { index, view ->
                         val globalVisibilityRectangle = Rect()
-                        it.getGlobalVisibleRect(globalVisibilityRectangle)
-                        Pair(it, globalVisibilityRectangle)
+                        view.getGlobalVisibleRect(globalVisibilityRectangle)
+                        Triple(view, globalVisibilityRectangle, index)
                     }.filter {
                         it.first.isOnTheScreen(it.second)
                     }.map {
                         val percentageShow = ((it.second.right - it.second.left) / it.first.width.toFloat())
-                        Pair(it.first, percentageShow)
+                        Triple(it.first, percentageShow, it.third)
                     }.sortedByDescending { it.second }.toList()
 
                     items.firstOrNull()?.let {
+                        selectedItem = it.third
                         val initialPosition = it.first.getPositionInParent().first
                         val screenWidth = Resources.getSystem().displayMetrics.widthPixels
                         val width = it.first.width
@@ -177,6 +178,8 @@ class CarouselLayout @JvmOverloads constructor(
 
             moveTo = false
         }
+
+        Log.i("Vini", "SelectedItem $selectedItem")
 
         return superOnTouchEvent
     }
