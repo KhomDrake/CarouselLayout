@@ -2,7 +2,9 @@
 <resources>
 
     <dimen name="edge_width">8dp</dimen>
+    <dimen name="between">4dp</dimen>
     <dimen name="start_and_end_margin">16dp</dimen>
     <dimen name="between_margin">8dp</dimen>
+    <dimen name="bottom_margin">20dp</dimen>
 
 </resources>
