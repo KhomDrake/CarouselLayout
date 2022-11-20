@@ -1,14 +1,17 @@
-package com.vinicius.carousel
+package com.vinicius.carousel.home
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
+import com.vinicius.carousel.R
 import com.vinicius.carousel.myviews.ViewBinder
 
-class MyAdapter(var type: MyObjectType = MyObjectType.BLUE): ListCarouselAdapter<MyObject>(MyDiffUtil()) {
+class MyAdapter(var type: MyObjectType = MyObjectType.BLUE): com.vinicius.carousel.ListCarouselAdapter<MyObject>(
+    MyDiffUtil()
+) {
 
-    override fun bind(position: Int, view: View, configLayoutCarousel: ConfigLayoutCarousel) {
+    override fun bind(position: Int, view: View, configLayoutCarousel: com.vinicius.carousel.ConfigLayoutCarousel) {
         super.bind(position, view, configLayoutCarousel)
         val data = currentList[position]
         (view as? ViewBinder)?.bind(data)
@@ -17,7 +20,7 @@ class MyAdapter(var type: MyObjectType = MyObjectType.BLUE): ListCarouselAdapter
     override fun createView(
         viewType: Int,
         parent: ViewGroup,
-        configLayoutCarousel: ConfigLayoutCarousel
+        configLayoutCarousel: com.vinicius.carousel.ConfigLayoutCarousel
     ): View {
         val layout = when (viewType) {
             MyObjectType.BLUE.ordinal -> R.layout.blue_item

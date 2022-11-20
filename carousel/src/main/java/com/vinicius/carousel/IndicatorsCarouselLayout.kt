@@ -4,8 +4,6 @@ import android.content.res.Resources
 import android.graphics.Canvas
 import android.graphics.Paint
 import androidx.annotation.ColorInt
-import androidx.core.view.children
-import androidx.core.view.setPadding
 import androidx.recyclerview.widget.RecyclerView
 
 internal class IndicatorsCarouselLayout(

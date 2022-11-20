@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Rect
 import android.util.AttributeSet
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.appcompat.widget.LinearLayoutCompat
@@ -73,15 +74,19 @@ internal class ContentCarouselLayout @JvmOverloads constructor(
         horizontalWithIndicator?.onDrawOver(canvas, this, scrollX)
     }
 
-    fun updateViewsToSameHeight() {
+    private fun updateViewsToSameHeight() {
         doOnPreDraw {
-            val maxHeight = children.asSequence().sortedByDescending { it.height }
-                .firstOrNull()?.height ?: return@doOnPreDraw
+            val maxHeight = children.asSequence().sortedByDescending { it.measuredHeight }
+                .firstOrNull()?.measuredHeight ?: return@doOnPreDraw
 
             val itemsWithDifferenceHeights = children.asSequence()
-                .filter { it.layoutParams?.height != maxHeight }.toList()
+                .filter { it.measuredHeight != maxHeight }.toList()
+
+            Log.i("Vini", maxHeight.toString())
+            Log.i("Vini", itemsWithDifferenceHeights.map { it.measuredHeight }.toString())
 
             itemsWithDifferenceHeights.forEach { it.layoutParams?.height = maxHeight }
+            if(itemsWithDifferenceHeights.isNotEmpty()) requestLayout()
 
             if(itemAdded && itemsWithDifferenceHeights.isEmpty()) {
                 itemAdded = false

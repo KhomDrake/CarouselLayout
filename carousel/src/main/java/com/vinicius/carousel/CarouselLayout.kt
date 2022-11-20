@@ -7,7 +7,6 @@ import android.graphics.Canvas
 import android.graphics.Rect
 import android.os.SystemClock
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -47,6 +46,7 @@ class CarouselLayout @JvmOverloads constructor(
 
     init {
         content = ContentCarouselLayout(context, attrs, defStyleAttr)
+        content.id = R.id.content_carousel_layout
         addView(content)
     }
 
