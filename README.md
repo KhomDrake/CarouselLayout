@@ -5,10 +5,10 @@
 [x] Scroll
     [x] Snap
     [x] Stop at the middle
-[ ] All items with the same height
+[x] All items with the same height
     [x] When adding a new one
-    [ ] When change device configuration
-[ ] Item Width based on device width
+    [x] When change device configuration
+[x] Item Width based on device width
 [ ] Listener OnChangeItemSelected
 [x] Updating Items
     [x] Add

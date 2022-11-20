@@ -1,11 +1,11 @@
-package com.vinicius.carousel.home
+package com.vinicius.carousel.normal
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import com.vinicius.carousel.R
-import com.vinicius.carousel.myviews.ViewBinder
+import com.vinicius.carousel.normal.myviews.ViewBinder
 
 class MyAdapter(var type: MyObjectType = MyObjectType.BLUE): com.vinicius.carousel.ListCarouselAdapter<MyObject>(
     MyDiffUtil()

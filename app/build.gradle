@@ -40,6 +40,7 @@ dependencies {
     implementation 'android.arch.lifecycle:viewmodel:1.1.1'
     implementation 'androidx.lifecycle:lifecycle-livedata-core-ktx:2.5.1'
     implementation 'io.insert-koin:koin-android:3.3.0'
+    implementation "io.github.matheus-corregiari:delegate:1.0.0-rc-04"
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

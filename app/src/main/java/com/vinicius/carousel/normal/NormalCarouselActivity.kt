@@ -1,18 +1,17 @@
-package com.vinicius.carousel.home
+package com.vinicius.carousel.normal
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import com.vinicius.carousel.CarouselLayout
 import com.vinicius.carousel.ConfigLayoutCarousel
 import com.vinicius.carousel.R
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import kotlin.random.Random
 
-class MainActivity : AppCompatActivity(R.layout.activity_main) {
+class NormalCarouselActivity : AppCompatActivity(R.layout.activity_normal) {
 
     private var adapter = MyAdapter()
-    private val viewModel: HomeViewModel by viewModel()
+    private val viewModel: NormalViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -1,11 +1,11 @@
-package com.vinicius.carousel.home
+package com.vinicius.carousel.normal
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import kotlin.random.Random
 
-class HomeViewModel : ViewModel() {
+class NormalViewModel : ViewModel() {
 
     private val _data = MutableLiveData<List<MyObject>>()
 

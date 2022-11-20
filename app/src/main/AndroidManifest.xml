@@ -15,7 +15,7 @@
         android:theme="@style/Theme.Carousel"
         tools:targetApi="31">
         <activity
-            android:name=".home.MainActivity"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,6 +23,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".normal.NormalCarouselActivity"
+            android:label="Normal"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".collapse.CollapseCarouselActivity"
+            android:label="Collapse"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

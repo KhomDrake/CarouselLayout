@@ -1,7 +1,7 @@
 package com.vinicius.carousel
 
 import android.app.Application
-import com.vinicius.carousel.home.HomeViewModel
+import com.vinicius.carousel.normal.NormalViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -17,7 +17,7 @@ class CarouselApp : Application() {
             androidContext(this@CarouselApp)
             modules(
                 module {
-                    viewModel { HomeViewModel() }
+                    viewModel { NormalViewModel() }
                 }
             )
         }

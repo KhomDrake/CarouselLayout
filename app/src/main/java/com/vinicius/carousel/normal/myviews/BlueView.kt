@@ -1,4 +1,4 @@
-package com.vinicius.carousel.myviews
+package com.vinicius.carousel.normal.myviews
 
 import android.content.Context
 import android.util.AttributeSet
@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.ViewOutlineProvider
 import android.widget.FrameLayout
 import androidx.appcompat.widget.AppCompatTextView
-import com.vinicius.carousel.home.MyObject
+import com.vinicius.carousel.normal.MyObject
 import com.vinicius.carousel.R
 
 class BlueView @JvmOverloads constructor(
