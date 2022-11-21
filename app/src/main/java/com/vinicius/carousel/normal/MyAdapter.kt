@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import com.vinicius.carousel.R
-import com.vinicius.carousel.normal.myviews.ViewBinder
+import com.vinicius.carousel.normal.views.ViewBinder
 
 class MyAdapter(var type: MyObjectType = MyObjectType.BLUE): com.vinicius.carousel.ListCarouselAdapter<MyObject>(
     MyDiffUtil()

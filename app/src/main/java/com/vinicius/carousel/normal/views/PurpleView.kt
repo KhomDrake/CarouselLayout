@@ -1,4 +1,4 @@
-package com.vinicius.carousel.normal.myviews
+package com.vinicius.carousel.normal.views
 
 import android.content.Context
 import android.util.AttributeSet
@@ -9,19 +9,26 @@ import androidx.appcompat.widget.AppCompatTextView
 import com.vinicius.carousel.normal.MyObject
 import com.vinicius.carousel.R
 
-class BlueView @JvmOverloads constructor(
+interface ViewBinder {
+
+    fun bind(data: MyObject)
+
+}
+
+
+class PurpleView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr), ViewBinder {
 
     init {
-        LayoutInflater.from(context).inflate(R.layout.blue_item_layout, this)
+        LayoutInflater.from(context).inflate(R.layout.purple_item_layout, this)
         layoutParams = LayoutParams(
             LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT
         )
-        setBackgroundResource(R.drawable.background_blue)
+        setBackgroundResource(R.drawable.background_purple)
         outlineProvider = ViewOutlineProvider.BACKGROUND
         clipToOutline = true
     }

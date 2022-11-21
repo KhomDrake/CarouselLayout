@@ -1,6 +1,7 @@
 package com.vinicius.carousel
 
 import android.app.Application
+import com.vinicius.carousel.collapse.CharacterViewModel
 import com.vinicius.carousel.normal.NormalViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -18,6 +19,7 @@ class CarouselApp : Application() {
             modules(
                 module {
                     viewModel { NormalViewModel() }
+                    viewModel { CharacterViewModel() }
                 }
             )
         }

@@ -18,6 +18,12 @@ class NormalViewModel : ViewModel() {
         i = 0
     }
 
+    init {
+        _data.postValue(listOf(
+            getItem(), getItem(), getItem()
+        ))
+    }
+
     private fun getItem() = run {
         val a = generateItem(i)
         i += 2

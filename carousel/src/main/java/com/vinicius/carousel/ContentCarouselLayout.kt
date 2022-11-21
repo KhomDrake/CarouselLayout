@@ -82,9 +82,6 @@ internal class ContentCarouselLayout @JvmOverloads constructor(
             val itemsWithDifferenceHeights = children.asSequence()
                 .filter { it.measuredHeight != maxHeight }.toList()
 
-            Log.i("Vini", maxHeight.toString())
-            Log.i("Vini", itemsWithDifferenceHeights.map { it.measuredHeight }.toString())
-
             itemsWithDifferenceHeights.forEach { it.layoutParams?.height = maxHeight }
             if(itemsWithDifferenceHeights.isNotEmpty()) requestLayout()
 

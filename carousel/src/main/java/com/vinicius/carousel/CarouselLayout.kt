@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.Rect
 import android.os.SystemClock
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -30,7 +31,7 @@ class CarouselLayout @JvmOverloads constructor(
     private var lastClickTime: Long = -1
     private var selectedItem = -1
 
-    var carouselAdapter: CarouselAdapter? = null
+    private var carouselAdapter: CarouselAdapter? = null
         private set
     var showIndicators = false
 
@@ -41,6 +42,7 @@ class CarouselLayout @JvmOverloads constructor(
 
     fun setCollapse(newValue: Boolean) : CarouselLayout {
         content.collapse = newValue
+        Log.i("Vini", "NewCollapse: $newValue")
         return this
     }
 
