@@ -1,5 +1,6 @@
 package com.vinicius.carousel
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Rect
@@ -7,11 +8,48 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.annotation.DimenRes
 import androidx.appcompat.widget.LinearLayoutCompat
+import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.core.view.doOnPreDraw
 import androidx.recyclerview.widget.RecyclerView
+
+class CollapseHelper(
+    context: Context,
+    val collapsePercentage: Float,
+    val maxHeightPercentage: Float,
+    @DimenRes
+    minHeightRes: Int,
+    var collapse: Boolean = false,
+    var animateCollapse: Boolean = false
+) {
+
+    private val minHeightPx: Int
+
+    init {
+        minHeightPx = context.getDimension(minHeightRes)
+    }
+
+    fun collapsedHeight(
+        lastMaxHeight: Float,
+        collapsePercentage: Float
+    ) : Float {
+        val minHeight = lastMaxHeight * collapsePercentage
+
+        val minCollapsedHeight = minHeightPx * collapsePercentage
+
+        return if(minCollapsedHeight > minHeight) minCollapsedHeight else minHeight
+    }
+
+    fun maxHeight(lastMaxHeight: Float, maxHeightPercentage: Float) : Float {
+        val maxHeightAllowed = minHeightPx * maxHeightPercentage
+
+        return if(lastMaxHeight > maxHeightAllowed) maxHeightAllowed else lastMaxHeight
+    }
+
+}
 
 internal class ContentCarouselLayout @JvmOverloads constructor(
     context: Context,
@@ -19,39 +57,15 @@ internal class ContentCarouselLayout @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : LinearLayoutCompat(context, attrs, defStyleAttr) {
 
-    internal var collapse: Boolean = false
+    internal var collapseHelper: CollapseHelper? = null
+    private var lastMaxHeight: Float = -1f
     private var itemAdded: Boolean = false
-    private var horizontalWithIndicator: IndicatorsCarouselLayout? = null
 
     init {
         orientation = HORIZONTAL
         layoutParams = FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        configHorizontalWithIndicator()
-    }
-
-    fun configHorizontalWithIndicator(
-        colorSelectedId: Int = R.color.purple_700,
-        colorNoSelectedId: Int = R.color.teal_700,
-        paddingBottom: Int = R.dimen.bottom_margin
-    ) {
-        val selectedWidthPixels: Int = context.getDimension(R.dimen.start_and_end_margin)
-        val spacingBetweenInPixels: Int = context.getDimension(R.dimen.between)
-        val colorSelected = ContextCompat.getColor(context, colorSelectedId)
-        val colorNoSelected = ContextCompat.getColor(context, colorNoSelectedId)
-        val paddingBottomToIndicator = context.getDimension(paddingBottom)
-        val ySegmentSize = selectedWidthPixels / 4
-        val spacingToDrawIndicators = paddingBottomToIndicator + ySegmentSize
-        setPadding(paddingStart, paddingTop, paddingEnd, spacingToDrawIndicators)
-        horizontalWithIndicator = IndicatorsCarouselLayout(
-            spacingToDrawIndicators,
-            selectedWidthPixels,
-            ySegmentSize,
-            spacingBetweenInPixels,
-            colorSelected,
-            colorNoSelected
         )
     }
 
@@ -65,13 +79,43 @@ internal class ContentCarouselLayout @JvmOverloads constructor(
     }
 
     internal fun collapse() {
+        collapseHelper?.animateCollapse = false
         doOnPreDraw {
-            children.map { it as? CollapseInterface }.forEach { it?.animationCollapse(collapse) }
-        }
-    }
+            val collapseHelper = collapseHelper ?: return@doOnPreDraw
 
-    fun onDrawOver(canvas: Canvas, scrollX: Int) {
-        horizontalWithIndicator?.onDrawOver(canvas, this, scrollX)
+            val collapse = collapseHelper.collapse
+
+            val collapseViews = children.asSequence()
+                .filter { it is CollapseView }
+                .map { it as CollapseView }.toList()
+
+            if(collapseViews.isEmpty()) return@doOnPreDraw
+
+            val firstView = collapseViews.first()
+
+            val collapsePercentage = collapseHelper.collapsePercentage
+            val maxHeightPercentage = collapseHelper.maxHeightPercentage
+
+            val maxHeight = collapseHelper.maxHeight(lastMaxHeight, maxHeightPercentage)
+            val collapsedHeight = collapseHelper.collapsedHeight(lastMaxHeight, collapsePercentage)
+
+            val initial = if(collapse) maxHeight else collapsedHeight
+            val end = if(collapse) collapsedHeight else maxHeight
+
+            val anim = ValueAnimator.ofInt(initial.toInt(), end.toInt())
+            anim.addUpdateListener {
+                val newHeight = it.animatedValue as Int
+                collapseViews.forEach { view ->
+                    view.layoutParams?.height = newHeight
+                    view.requestLayout()
+                }
+            }
+            anim.duration = firstView.defaultCollapseAnimationDuration()
+
+            collapseViews.forEach { it.animationCollapse(collapse) }
+
+            anim.start()
+        }
     }
 
     private fun updateViewsToSameHeight() {
@@ -85,9 +129,23 @@ internal class ContentCarouselLayout @JvmOverloads constructor(
             itemsWithDifferenceHeights.forEach { it.layoutParams?.height = maxHeight }
             if(itemsWithDifferenceHeights.isNotEmpty()) requestLayout()
 
-            if(itemAdded && itemsWithDifferenceHeights.isEmpty()) {
+            if(maxHeight > lastMaxHeight)
+                lastMaxHeight = maxHeight.toFloat()
+
+            if(itemsWithDifferenceHeights.isNotEmpty()) return@doOnPreDraw
+
+            if(collapseHelper?.animateCollapse == true) {
+                collapseHelper?.animateCollapse = false
                 itemAdded = false
                 collapse()
+                return@doOnPreDraw
+            }
+
+            if(itemAdded && collapseHelper?.animateCollapse == false) {
+                collapseHelper?.animateCollapse = false
+                itemAdded = false
+                collapse()
+                return@doOnPreDraw
             }
         }
     }

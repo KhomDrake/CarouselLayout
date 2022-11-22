@@ -7,7 +7,6 @@ import android.graphics.Canvas
 import android.graphics.Rect
 import android.os.SystemClock
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -24,25 +23,17 @@ class CarouselLayout @JvmOverloads constructor(
     private val content: ContentCarouselLayout
     private val defaultInterval = 100
     private var configLayoutCarousel = ConfigLayoutCarousel()
-    private var canMeasureChild: () -> Boolean = { true }
     private var onSwipe: (Int) -> Unit = {}
     private var moveTo = false
     private var previousX = -1f
     private var lastClickTime: Long = -1
     private var selectedItem = -1
 
-    private var carouselAdapter: CarouselAdapter? = null
+    var carouselAdapter: CarouselAdapter? = null
         private set
-    var showIndicators = false
-
-    fun setCanMeasureChild(canMeasure: () -> Boolean) : CarouselLayout {
-        canMeasureChild = canMeasure
-        return this
-    }
 
     fun setCollapse(newValue: Boolean) : CarouselLayout {
-        content.collapse = newValue
-        Log.i("Vini", "NewCollapse: $newValue")
+        content.collapseHelper?.collapse = newValue
         return this
     }
 
@@ -50,16 +41,6 @@ class CarouselLayout @JvmOverloads constructor(
         content = ContentCarouselLayout(context, attrs, defStyleAttr)
         content.id = R.id.content_carousel_layout
         addView(content)
-    }
-
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-        if(showIndicators) content.onDrawOver(canvas, scrollX)
-    }
-
-    fun configHorizontalWithIndicator(paddingBottom: Int) : CarouselLayout {
-        content.configHorizontalWithIndicator(paddingBottom)
-        return this
     }
 
     private fun onUpdateItems(updates: List<UpdateCarousel>, clear: Boolean) {
@@ -148,6 +129,10 @@ class CarouselLayout @JvmOverloads constructor(
 
     fun collapse() {
         content.collapse()
+    }
+
+    fun setCollapseHelper(collapseHelper: CollapseHelper?) {
+        content.collapseHelper = collapseHelper
     }
 
     private fun updateChildren() {

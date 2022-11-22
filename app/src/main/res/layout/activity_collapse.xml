@@ -18,6 +18,32 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:foreground="?attr/selectableItemBackground"
+        android:textColor="@color/white"
+        android:background="#2A45CD"
+        android:text="Add"
+        android:layout_margin="16dp"
+        app:layout_constraintStart_toEndOf="@id/collapse"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/remove"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:foreground="?attr/selectableItemBackground"
+        android:textColor="@color/white"
+        android:background="#2A45CD"
+        android:text="Remove"
+        android:layout_margin="16dp"
+        app:layout_constraintStart_toEndOf="@id/add"
+        app:layout_constraintTop_toTopOf="parent"/>
+
     <com.vinicius.carousel.CarouselLayout
         android:id="@+id/carousel_layout"
         android:layout_width="match_parent"
