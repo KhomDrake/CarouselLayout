@@ -12,7 +12,7 @@ class NormalViewModel : ViewModel() {
     val data: LiveData<List<MyObject>>
         get() = _data
 
-    var i = 0
+    var i = 10
 
     fun resetCount() {
         i = 0
@@ -26,7 +26,7 @@ class NormalViewModel : ViewModel() {
 
     private fun getItem() = run {
         val a = generateItem(i)
-        i += 2
+        i -= 2
         a
     }
 

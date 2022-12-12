@@ -2,16 +2,14 @@ package com.vinicius.carousel
 
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.Canvas
 import android.graphics.Rect
 import android.util.AttributeSet
-import android.util.Log
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.annotation.DimenRes
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.animation.doOnEnd
-import androidx.core.content.ContextCompat
+import androidx.core.animation.doOnStart
 import androidx.core.view.children
 import androidx.core.view.doOnPreDraw
 import androidx.recyclerview.widget.RecyclerView
@@ -23,7 +21,8 @@ class CollapseHelper(
     @DimenRes
     minHeightRes: Int,
     var collapse: Boolean = false,
-    var animateCollapse: Boolean = false
+    var animateCollapse: Boolean = false,
+    val animationDuration: Long = 1000L
 ) {
 
     private val minHeightPx: Int
@@ -51,6 +50,8 @@ class CollapseHelper(
 
 }
 
+private const val DEFAULT_LAST_MAX_HEIGHT = -5f
+
 internal class ContentCarouselLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -58,8 +59,9 @@ internal class ContentCarouselLayout @JvmOverloads constructor(
 ) : LinearLayoutCompat(context, attrs, defStyleAttr) {
 
     internal var collapseHelper: CollapseHelper? = null
-    private var lastMaxHeight: Float = -1f
-    private var itemAdded: Boolean = false
+    private var lastMaxHeight: Float = DEFAULT_LAST_MAX_HEIGHT
+    private var shouldCollapsed: Boolean = false
+    private var inAnimation = false
 
     init {
         orientation = HORIZONTAL
@@ -75,7 +77,7 @@ internal class ContentCarouselLayout @JvmOverloads constructor(
     }
 
     fun setItemAdded(newValue: Boolean) {
-        itemAdded = newValue
+        shouldCollapsed = newValue
     }
 
     internal fun collapse() {
@@ -110,7 +112,13 @@ internal class ContentCarouselLayout @JvmOverloads constructor(
                     view.requestLayout()
                 }
             }
-            anim.duration = firstView.defaultCollapseAnimationDuration()
+            anim.duration = collapseHelper.animationDuration
+            anim.doOnStart {
+                inAnimation = true
+            }
+            anim.doOnEnd {
+                inAnimation = false
+            }
 
             collapseViews.forEach { it.animationCollapse(collapse) }
 
@@ -129,21 +137,22 @@ internal class ContentCarouselLayout @JvmOverloads constructor(
             itemsWithDifferenceHeights.forEach { it.layoutParams?.height = maxHeight }
             if(itemsWithDifferenceHeights.isNotEmpty()) requestLayout()
 
-            if(maxHeight > lastMaxHeight)
+            if(maxHeight != lastMaxHeight.toInt() && !inAnimation && collapseHelper?.collapse != true
+                || lastMaxHeight == DEFAULT_LAST_MAX_HEIGHT)
                 lastMaxHeight = maxHeight.toFloat()
 
             if(itemsWithDifferenceHeights.isNotEmpty()) return@doOnPreDraw
 
             if(collapseHelper?.animateCollapse == true) {
                 collapseHelper?.animateCollapse = false
-                itemAdded = false
+                shouldCollapsed = false
                 collapse()
                 return@doOnPreDraw
             }
 
-            if(itemAdded && collapseHelper?.animateCollapse == false) {
+            if(shouldCollapsed && collapseHelper?.animateCollapse == false) {
                 collapseHelper?.animateCollapse = false
-                itemAdded = false
+                shouldCollapsed = false
                 collapse()
                 return@doOnPreDraw
             }

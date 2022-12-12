@@ -15,7 +15,7 @@ class ConfigLayoutCarousel(
     private val percentageOfScreen: Float = 1f
 ) {
 
-    fun configLayout(context: Context, view: View, position: Int, size: Int) {
+    fun configLayout(context: Context, view: View, position: Int, size: Int, recalculateHeight: Boolean) {
         view.layoutParams?.apply {
             val edgeWidthRealValue = context.getDimension(edgeWidth)
             val newWidth = if(size == 1) {
@@ -26,6 +26,7 @@ class ConfigLayoutCarousel(
                         (timesEdgeWidthMoreItems * edgeWidthRealValue).toInt()
             }
             if(newWidth != width) width = newWidth
+            if(recalculateHeight) height = ViewGroup.LayoutParams.WRAP_CONTENT
         }
 
         val marginStart = if(position == 0) context.getDimension(startAndEndMargin)

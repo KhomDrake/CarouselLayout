@@ -123,8 +123,9 @@ class CarouselLayout @JvmOverloads constructor(
         }
 
         val hasItemAdded = updates.find { it.type == UpdateCarouselType.ADD } != null
-        updateChildren()
-        content.setItemAdded(hasItemAdded)
+        val hasUpdatedItem = updates.find { it.type == UpdateCarouselType.UPDATE } != null
+        updateChildren(hasUpdatedItem)
+        content.setItemAdded(hasItemAdded || hasUpdatedItem)
     }
 
     fun collapse() {
@@ -135,10 +136,10 @@ class CarouselLayout @JvmOverloads constructor(
         content.collapseHelper = collapseHelper
     }
 
-    private fun updateChildren() {
+    private fun updateChildren(recalculateHeight: Boolean) {
         val adapter = carouselAdapter ?: return
         content.children.forEachIndexed { index, view ->
-            configLayoutCarousel.configLayout(view.context, view, index, adapter.getItemCount())
+            configLayoutCarousel.configLayout(view.context, view, index, adapter.getItemCount(), recalculateHeight)
         }
     }
 
